@@ -1,50 +1,32 @@
-# Document Storage - Frontend
+# Document Storage – Frontend
 
-Frontend do projeto Document Storage, uma plataforma para armazenar documentos de forma temporária e segura.
+Frontend of the Document Storage project, a platform to store documents temporarily and securely.
 
-## Características
+## Features
 
-- Design estilo Apple, limpo e moderno
-- Totalmente responsivo para mobile
-- Upload de arquivos com barra de progresso
-- Geração de QR Code e código de download
-- Suporte para usuários anônimos e registrados
-- Sistema de pagamento PIX para armazenamento adicional
+- clean and modern design
+- Fully responsive for mobile devices
+- File upload with progress bar
+- QR Code generation and download code
+- Support for anonymous and registered users
+- PIX payment system for additional storage
 
-## Tecnologias
+## Technologies
 
-- React 18
 - TypeScript
 - Vite
 - Tailwind CSS
-- React Router
-- QRCode.react
+- React
 
-## Instalação
+## Installation
 
-```bash
+```
 npm install
+
 ```
+## Development
 
-## Desenvolvimento
-
-```bash
+```
 npm run dev
-```
-
-## Build
-
-```bash
-npm run build
-```
-
-## Estrutura do Projeto
 
 ```
-src/
-├── components/     # Componentes reutilizáveis
-├── pages/         # Páginas da aplicação
-├── App.tsx        # Componente principal
-└── main.tsx       # Entry point
-```
-
