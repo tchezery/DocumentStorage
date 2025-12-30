@@ -1,0 +1,61 @@
+import axios from 'axios';
+
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add request interceptor to include auth token
+api.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+export const httpClient = {
+  get: async <T>(endpoint: string): Promise<T> => {
+    const response = await api.get<T>(endpoint);
+    return response.data;
+  },
+
+  post: async <T>(endpoint: string, data: any): Promise<T> => {
+    const response = await api.post<T>(endpoint, data);
+    return response.data;
+  },
+
+  upload: async <T>(endpoint: string, files: File[], onProgress?: (progress: number) => void): Promise<T> => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+
+    // Get token for upload request since it uses a different config object structure (though instance defaults might not apply if we override too much, but here we use the instance 'api')
+    // Actually, api.post uses the interceptor. But we are passing a config object as the 3rd arg.
+    // Axios merges config. So the interceptor should still run and add headers.
+    // However, let's be safe. The interceptor modifies 'config', so it should work for all requests made via 'api'.
+
+    const response = await api.post<T>(endpoint, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percentComplete = (progressEvent.loaded / progressEvent.total) * 100;
+          onProgress(percentComplete);
+        }
+      },
+    });
+
+    return response.data;
+  },
+
+  getUri: (endpoint: string): string => {
+    return `${BASE_URL}${endpoint}`;
+  }
+};
