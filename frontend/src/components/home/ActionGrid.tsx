@@ -5,7 +5,7 @@ import CardCarousel from '../ui/CardCarousel'
 
 interface ActionGridProps {
   onUploadComplete: (files: File[], code: string) => void
-  onDownload: (code: string) => void
+  onDownload: (code: string) => Promise<void>
   onUpgradeClick: () => void
 }
 

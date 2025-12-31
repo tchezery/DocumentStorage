@@ -52,5 +52,12 @@ export const httpClient = {
 
   getUri: (endpoint: string): string => {
     return `${BASE_URL}${endpoint}`;
+  },
+
+  download: async (endpoint: string): Promise<Blob> => {
+    const response = await api.get(endpoint, {
+      responseType: 'blob',
+    });
+    return response.data;
   }
 };

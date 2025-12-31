@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Folder, File as FileIcon, Download, ChevronRight, Home as HomeIcon, ArrowLeft } from 'lucide-react'
+import { X, Folder, File as FileIcon, Download, ChevronRight, ChevronDown, FileJson, FileCode, FileImage, FileText } from 'lucide-react'
 import { FileNode } from '../types/dtos'
 import { fileService } from '../services/fileService'
 import Button from './Button'
@@ -7,204 +7,172 @@ import Button from './Button'
 interface FileBrowserModalProps {
   code: string
   onClose: () => void
+  onDownload: () => void
 }
 
-export default function FileBrowserModal({ code, onClose }: FileBrowserModalProps) {
+// Helper to render file icons based on extension
+const getFileIcon = (name: string, className: string) => {
+  const ext = name.split('.').pop()?.toLowerCase()
+  switch (ext) {
+    case 'json': return <FileJson className={className} color="#f1c40f" />
+    case 'js':
+    case 'ts':
+    case 'tsx':
+    case 'jsx': return <FileCode className={className} color="#3498db" />
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'svg': return <FileImage className={className} color="#e74c3c" />
+    case 'txt':
+    case 'md': return <FileText className={className} color="#95a5a6" />
+    default: return <FileIcon className={className} color="#bdc3c7" />
+  }
+}
+
+const FileRow = ({ node, level, onToggle }: { node: FileNode, level: number, onToggle: (path: string) => void }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const isFolder = node.type === 'folder'
+  
+  const handleToggle = () => {
+    if (isFolder) {
+      setIsOpen(!isOpen)
+      onToggle(node.path)
+    }
+  }
+
+  const paddingLeft = `${level * 1.5}rem`
+
+  return (
+    <>
+      <div 
+        className={`
+          flex items-center py-1 px-2 hover:bg-[#2a2d2e] cursor-pointer text-sm font-mono
+          ${isOpen ? 'text-white' : 'text-[#cccccc]'}
+        `}
+        style={{ paddingLeft }}
+        onClick={handleToggle}
+      >
+        <div className="w-5 flex-shrink-0 mr-1 flex items-center justify-center">
+          {isFolder && (
+            isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+          )}
+        </div>
+        <div className="mr-2">
+          {isFolder ? (
+            <Folder className={`w-4 h-4 ${isOpen ? 'text-blue-400' : 'text-blue-300'}`} />
+          ) : (
+            getFileIcon(node.name, "w-4 h-4")
+          )}
+        </div>
+        <span className="truncate flex-1">{node.name}</span>
+        {!isFolder && node.size && (
+          <span className="text-xs text-gray-500 ml-4">
+            {(node.size / 1024).toFixed(1)} KB
+          </span>
+        )}
+      </div>
+      {isOpen && node.children && (
+        <div>
+          {node.children.map(child => (
+            <FileRow key={child.path} node={child} level={level + 1} onToggle={onToggle} />
+          ))}
+        </div>
+      )}
+    </>
+  )
+}
+
+export default function FileBrowserModal({ code, onClose, onDownload }: FileBrowserModalProps) {
   const [structure, setStructure] = useState<FileNode[]>([])
-  const [currentPath, setCurrentPath] = useState<FileNode[]>([]) // Stack of folders
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchStructure = async () => {
       try {
-        const data = await fileService.getFileStructure(code)
+        const data = await fileService.getFileInfo(code)
         setStructure(data)
-      } catch (error) {
-        console.error('Failed to fetch file structure', error)
-        alert('Erro ao carregar arquivos.')
-        onClose()
+      } catch (err) {
+        console.error(err)
+        // Fallback fake data for demonstration if backend fails (since user might not have endpoint yet)
+        // Remove this fallback when backend is ready
+        setStructure([
+          { name: 'src', type: 'folder', date: '', path: 'src', children: [
+            { name: 'App.tsx', type: 'file', size: 2048, date: '', path: 'src/App.tsx' },
+            { name: 'main.tsx', type: 'file', size: 1024, date: '', path: 'src/main.tsx' },
+            { name: 'components', type: 'folder', date: '', path: 'src/components', children: [
+               { name: 'Button.tsx', type: 'file', size: 500, date: '', path: 'src/components/Button.tsx' }
+            ]}
+          ]},
+          { name: 'package.json', type: 'file', size: 1500, date: '', path: 'package.json' },
+          { name: 'README.md', type: 'file', size: 3000, date: '', path: 'README.md' },
+        ])
+        setError('Não foi possível carregar a estrutura real (endpoint /file/info faltando?). Exibindo dados de exemplo.')
       } finally {
         setLoading(false)
       }
     }
     fetchStructure()
-  }, [code, onClose])
-
-  // Get current folder contents
-  const currentFiles = currentPath.length === 0 
-    ? structure 
-    : currentPath[currentPath.length - 1].children || []
-
-  const handleNavigate = (folder: FileNode) => {
-    setCurrentPath([...currentPath, folder])
-  }
-
-  const handleNavigateUp = () => {
-    if (currentPath.length === 0) return
-    setCurrentPath(currentPath.slice(0, -1))
-  }
-
-  const handleBreadcrumbClick = (index: number) => {
-    if (index === -1) {
-      setCurrentPath([])
-    } else {
-      setCurrentPath(currentPath.slice(0, index + 1))
-    }
-  }
-
-  const handleDownloadFile = (file: FileNode) => {
-    // In a real app, this would use the path to generate a specific download URL
-    // For now, we simulate downloading the file
-    // const url = fileService.getDownloadUrl(code, file.path) 
-    // window.open(url, '_blank')
-    alert(`Iniciando download de: ${file.name}`)
-  }
-
-  const handleDownloadAll = () => {
-    const url = fileService.getDownloadUrl(code)
-    window.location.href = url
-  }
-
-  const formatSize = (bytes?: number) => {
-    if (bytes === undefined) return '-'
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-        <div className="bg-white rounded-3xl p-8 shadow-xl">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0071e3] mx-auto"></div>
-          <p className="mt-4 text-gray-500 font-medium">Carregando arquivos...</p>
-        </div>
-      </div>
-    )
-  }
+  }, [code])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl animate-slide-up overflow-hidden">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white z-10">
-          <div className="flex items-center space-x-3">
-             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                <Folder className="h-5 w-5 text-[#0071e3]" />
-             </div>
-             <div>
-               <h2 className="text-xl font-semibold text-gray-900 tracking-tight">Arquivos do Código: {code}</h2>
-               <p className="text-sm text-gray-500">Navegue e baixe o que precisar</p>
-             </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in font-sans">
+      <div className="bg-[#1e1e1e] rounded-lg w-full max-w-3xl h-[600px] flex flex-col shadow-2xl overflow-hidden border border-[#333]">
+        
+        {/* VSCode Header */}
+        <div className="flex items-center justify-between px-4 py-2 bg-[#252526] border-b border-[#1e1e1e]">
+          <div className="flex items-center space-x-2">
+            <span className="text-[#cccccc] text-xs uppercase tracking-wider font-semibold">Explorer</span>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
-
-        {/* Toolbar & Breadcrumbs */}
-        <div className="px-6 py-4 bg-gray-50 flex items-center justify-between border-b border-gray-100">
-          <div className="flex items-center space-x-2 text-sm text-gray-600 overflow-x-auto no-scrollbar">
-            <button 
-              onClick={() => handleBreadcrumbClick(-1)}
-              className="p-1 hover:bg-gray-200 rounded transition-colors"
-            >
-              <HomeIcon className="h-4 w-4" />
-            </button>
-            {currentPath.map((folder, index) => (
-              <div key={folder.path} className="flex items-center">
-                <ChevronRight className="h-4 w-4 text-gray-400 mx-1" />
-                <button
-                  onClick={() => handleBreadcrumbClick(index)}
-                  className="hover:text-[#0071e3] font-medium hover:underline px-1 rounded transition-colors whitespace-nowrap"
-                >
-                  {folder.name}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex space-x-3 ml-4">
-             {currentPath.length > 0 && (
-                <button 
-                  onClick={handleNavigateUp}
-                  className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 text-sm flex items-center"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
-                </button>
-             )}
-             <Button onClick={handleDownloadAll} className="py-2 px-4 text-sm h-10">
-               <Download className="h-4 w-4 mr-2" /> Baixar Tudo (ZIP)
-             </Button>
+          <div className="flex items-center space-x-2">
+             <div className="text-[#cccccc] text-xs mr-4 bg-[#007acc] px-2 py-0.5 rounded text-white">
+               CODE: {code}
+             </div>
+             <button onClick={onClose} className="text-[#cccccc] hover:text-white">
+               <X className="w-4 h-4" />
+             </button>
           </div>
         </div>
 
-        {/* File List */}
-        <div className="flex-1 overflow-y-auto">
-          {currentFiles.length === 0 ? (
-             <div className="h-64 flex flex-col items-center justify-center text-gray-500">
-                <Folder className="h-12 w-12 mb-3 opacity-20" />
-                <p>Pasta vazia</p>
+        {/* VSCode Content */}
+        <div className="flex-1 overflow-auto p-2 font-mono">
+          {loading ? (
+             <div className="flex items-center justify-center h-full text-[#cccccc]">
+               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#007acc] mr-2"></div>
+               Loading structure...
              </div>
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-gray-100 text-gray-500 text-sm">
-                  <th className="px-6 py-3 font-medium w-1/2">Nome</th>
-                  <th className="px-6 py-3 font-medium">Tamanho</th>
-                  <th className="px-6 py-3 font-medium">Data</th>
-                  <th className="px-6 py-3 font-medium text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {currentFiles.map((node) => (
-                  <tr 
-                    key={node.path} 
-                    className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors group cursor-pointer"
-                    onClick={() => node.type === 'folder' ? handleNavigate(node) : handleDownloadFile(node)}
-                  >
-                    <td className="px-6 py-4 flex items-center space-x-3">
-                      {node.type === 'folder' ? (
-                        <Folder className="h-5 w-5 text-blue-400 fill-blue-50" />
-                      ) : (
-                        <FileIcon className="h-5 w-5 text-gray-400" />
-                      )}
-                      <span className="font-medium text-gray-700 group-hover:text-[#0071e3] transition-colors">
-                        {node.name}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500 font-mono text-xs">
-                      {formatSize(node.size)}
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {node.date}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {node.type === 'file' && (
-                         <button 
-                            onClick={(e) => { e.stopPropagation(); handleDownloadFile(node); }}
-                            className="p-2 text-gray-400 hover:text-[#0071e3] hover:bg-blue-100 rounded-lg transition-colors"
-                            title="Baixar arquivo"
-                         >
-                           <Download className="h-4 w-4" />
-                         </button>
-                      )}
-                    </td>
-                  </tr>
+            <>
+              {error && (
+                <div className="mb-2 p-2 bg-yellow-900/30 text-yellow-200 text-xs border border-yellow-700/50 rounded">
+                  WARN: {error}
+                </div>
+              )}
+              <div className="select-none">
+                {structure.map(node => (
+                  <FileRow key={node.path} node={node} level={0} onToggle={() => {}} />
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
-        
-        {/* Footer info */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50 text-xs text-gray-500 text-center">
-           {currentFiles.filter(f => f.type === 'file').length} arquivos, {currentFiles.filter(f => f.type === 'folder').length} pastas
+
+        {/* Footer Actions */}
+        <div className="p-4 bg-[#252526] border-t border-[#1e1e1e] flex justify-end items-center space-x-3">
+          <Button 
+            onClick={onClose} 
+            variant="ghost" 
+            className="text-[#cccccc] hover:text-white hover:bg-[#2a2d2e] h-8 text-sm"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={onDownload} 
+            className="bg-[#007acc] hover:bg-[#0062a3] text-white h-8 text-sm px-4 rounded-sm flex items-center"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download All
+          </Button>
         </div>
       </div>
     </div>

@@ -12,6 +12,8 @@ import HowItWorks from '../components/home/HowItWorks'
 import About from '../components/home/About'
 import Footer from '../components/Footer'
 
+import { fileService } from '../services/fileService'
+
 export default function Home() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -41,7 +43,7 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
     if (code) {
-      handleDownload(code)
+      handleCodeSubmit(code)
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
@@ -58,9 +60,32 @@ export default function Home() {
     setShowQRModal(true)
   }
 
-  const handleDownload = (code: string) => {
+  // Called when user enters code in the input
+  const handleCodeSubmit = async (code: string) => {
     setDownloadCode(code)
     setShowFileBrowser(true)
+  }
+
+  // Called when user clicks 'Download' inside the modal
+  const performDownload = async () => {
+    if (!downloadCode) return
+
+    try {
+      const blob = await fileService.downloadFile(downloadCode)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `arquivo-${downloadCode}` 
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      // Optional: Close modal after download starts?
+      // setShowFileBrowser(false) 
+    } catch (error) {
+      console.error('Download failed:', error)
+      alert('Erro ao baixar arquivo. Verifique se o código está correto e não expirou.')
+    }
   }
 
   return (
@@ -75,7 +100,7 @@ export default function Home() {
           {/* Upload and Download Sections - Side by Side */}
           <ActionGrid 
             onUploadComplete={handleUploadComplete}
-            onDownload={handleDownload}
+            onDownload={handleCodeSubmit}
             onUpgradeClick={() => setShowUpgradeModal(true)}
           />
 
@@ -106,7 +131,7 @@ export default function Home() {
         />
       )}
 
-      {/* File Browser Modal */}
+      {/* File Browser Modal (VSCode Style) */}
       {showFileBrowser && downloadCode && (
         <FileBrowserModal
           code={downloadCode}
@@ -114,6 +139,7 @@ export default function Home() {
             setShowFileBrowser(false)
             setDownloadCode(null)
           }}
+          onDownload={performDownload}
         />
       )}
 

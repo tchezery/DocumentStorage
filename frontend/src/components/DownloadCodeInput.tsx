@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Download, Search } from 'lucide-react'
 import Button from './Button'
-import { fileService } from '../services/fileService'
 
 interface DownloadCodeInputProps {
-  onDownload: (code: string) => void
+  onDownload: (code: string) => Promise<void>
 }
 
 export default function DownloadCodeInput({ onDownload }: DownloadCodeInputProps) {
@@ -16,14 +15,8 @@ export default function DownloadCodeInput({ onDownload }: DownloadCodeInputProps
     if (!code.trim()) return
 
     setIsLoading(true)
-    
     try {
-      // Verificar se o código existe
-      await fileService.checkCode(code.trim().toUpperCase())
-      onDownload(code.trim().toUpperCase())
-    } catch (error) {
-      console.error(error)
-      alert('Código inválido ou arquivo expirado.')
+      await onDownload(code.trim().toUpperCase())
     } finally {
       setIsLoading(false)
     }
@@ -51,7 +44,7 @@ export default function DownloadCodeInput({ onDownload }: DownloadCodeInputProps
           {isLoading ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              <span>Buscando...</span>
+              <span>Iniciando Download...</span>
             </>
           ) : (
             <>
