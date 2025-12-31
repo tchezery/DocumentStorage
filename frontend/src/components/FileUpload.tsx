@@ -15,49 +15,38 @@ interface FileUploadProps {
   onUploadComplete: (files: File[], code: string) => void
 }
 
-const MAX_SIZE_BYTES = 1024 * 1024 * 1024 // 1GB
-
 export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadProps) {
   const [files, setFiles] = useState<FileWithProgress[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const maxSizeBytes = maxSizeGB * 1024 * 1024 * 1024
+
   const validateFile = (file: File): string | null => {
-    if (file.size > MAX_SIZE_BYTES) {
+    if (file.size > maxSizeBytes) {
       return `Arquivo "${file.name}" excede o limite de ${maxSizeGB}GB`
     }
     return null
   }
 
   const handleFiles = useCallback((fileList: FileList | null) => {
-    if (!fileList) return
+    if (!fileList || fileList.length === 0) return
 
-    const newFiles: FileWithProgress[] = []
-    const totalSize = files.reduce((sum, f) => sum + f.file.size, 0)
+    const file = fileList[0]
+    const error = validateFile(file)
+    if (error) {
+      alert(error)
+      return
+    }
 
-    Array.from(fileList).forEach((file) => {
-      const error = validateFile(file)
-      if (error) {
-        alert(error)
-        return
-      }
-
-      if (totalSize + file.size > MAX_SIZE_BYTES) {
-        alert(`O tamanho total dos arquivos não pode exceder ${maxSizeGB}GB`)
-        return
-      }
-
-      newFiles.push({
-        file,
-        progress: 0,
-        status: 'pending',
-        id: Math.random().toString(36).substring(7)
-      })
-    })
-
-    setFiles(prev => [...prev, ...newFiles])
-  }, [files, maxSizeGB])
+    setFiles([{
+      file,
+      progress: 0,
+      status: 'pending',
+      id: Math.random().toString(36).substring(7)
+    }])
+  }, [maxSizeGB, maxSizeBytes])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -74,8 +63,8 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
     setIsDragging(false)
   }, [])
 
-  const removeFile = (id: string) => {
-    setFiles(prev => prev.filter(f => f.id !== id))
+  const removeFile = () => {
+    setFiles([])
   }
 
   const handleUpload = async () => {
@@ -83,7 +72,7 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
 
     setIsUploading(true)
     
-    // Marcar todos como fazendo upload
+    // Marcar como fazendo upload
     setFiles(prev => prev.map(f => 
       ({ ...f, status: 'uploading', progress: 0 })
     ))
@@ -92,7 +81,7 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
       const filesToUpload = files.map(f => f.file)
       
       const response = await fileService.uploadFiles(filesToUpload, (progress) => {
-        // Atualizar progresso de todos os arquivos
+        // Atualizar progresso
         setFiles(prev => prev.map(f => 
           ({ ...f, progress })
         ))
@@ -107,6 +96,7 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
       setTimeout(() => {
         onUploadComplete(filesToUpload, response.code)
         setIsUploading(false)
+        setFiles([]) // Limpar após sucesso
       }, 500)
 
     } catch (error) {
@@ -114,12 +104,12 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
       setFiles(prev => prev.map(f => 
         ({ ...f, status: 'error', progress: 0 })
       ))
-      alert('Falha no upload dos arquivos. Tente novamente.')
+      alert('Falha no upload do arquivo. Tente novamente.')
       setIsUploading(false)
     }
   }
 
-  const totalSize = files.reduce((sum, f) => sum + f.file.size, 0)
+  const totalSize = files.length > 0 ? files[0].file.size : 0
   const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2)
   const maxSizeMB = (maxSizeGB * 1024).toFixed(0)
 
@@ -138,7 +128,7 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
         <input
           ref={fileInputRef}
           type="file"
-          multiple
+          accept="*"
           onChange={(e) => handleFiles(e.target.files)}
           className="hidden"
           disabled={isUploading}
@@ -146,32 +136,33 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
 
         {files.length === 0 ? (
           <>
-            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium mb-2">
-              Arraste arquivos aqui ou clique para selecionar
+            <Upload className="mx-auto h-12 w-12 text-gray-300 mb-6" />
+            <p className="text-xl font-semibold mb-2 text-gray-900 tracking-tight">
+              Arraste qualquer arquivo aqui
             </p>
-            <p className="text-sm text-gray-500 mb-4">
-              Máximo {maxSizeGB}GB por arquivo
+            <p className="text-sm text-gray-500 mb-8 font-medium">
+              Todos os tipos são suportados. Máximo {maxSizeGB}GB.
             </p>
             <Button
               onClick={() => fileInputRef.current?.click()}
-              variant="outline"
+              variant="secondary"
+              className="mx-auto"
             >
-              Selecionar Arquivos
+              Selecionar Arquivo
             </Button>
           </>
         ) : (
           <div className="space-y-4">
             <div className="text-left">
               <p className="font-medium mb-2">
-                {files.length} arquivo(s) selecionado(s)
+                Arquivo selecionado
               </p>
               <p className="text-sm text-gray-500">
                 {totalSizeMB} MB / {maxSizeMB} MB
               </p>
             </div>
 
-            <div className="space-y-3 max-h-64 overflow-y-auto">
+            <div className="space-y-3">
               {files.map((fileWithProgress) => (
                 <div
                   key={fileWithProgress.id}
@@ -190,7 +181,7 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
                     </div>
                     {!isUploading && (
                       <button
-                        onClick={() => removeFile(fileWithProgress.id)}
+                        onClick={removeFile}
                         className="ml-2 p-1 hover:bg-gray-200 rounded"
                       >
                         <X className="h-4 w-4 text-gray-500" />
@@ -229,7 +220,7 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
                   variant="outline"
                   className="flex-1"
                 >
-                  Adicionar Mais
+                  Trocar Arquivo
                 </Button>
                 <Button
                   onClick={handleUpload}
@@ -244,4 +235,5 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
       </div>
     </div>
   )
+
 }

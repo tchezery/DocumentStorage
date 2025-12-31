@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '../components/Header'
 import QRCodeModal from '../components/QRCodeModal'
 import StorageUpgradeModal from '../components/StorageUpgradeModal'
-import { fileService } from '../services/fileService'
+import FileBrowserModal from '../components/FileBrowserModal'
 
 import Hero from '../components/home/Hero'
 import ActionGrid from '../components/home/ActionGrid'
@@ -12,17 +12,41 @@ import HowItWorks from '../components/home/HowItWorks'
 import About from '../components/home/About'
 import Footer from '../components/Footer'
 
+import { fileService } from '../services/fileService'
+
 export default function Home() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [showQRModal, setShowQRModal] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showFileBrowser, setShowFileBrowser] = useState(false)
+  
   const [uploadCode, setUploadCode] = useState<string | null>(null)
+  const [downloadCode, setDownloadCode] = useState<string | null>(null)
   const [expirationDate, setExpirationDate] = useState<Date | null>(null)
   const [adsWatched, setAdsWatched] = useState(0) // Rastrear anúncios assistidos
   
   // Simular preço atual (será calculado pelo backend baseado no uso)
   const [currentPrice] = useState(1.0) // $1 USD inicial
   const [isUSD] = useState(true) // Começa em USD, depois muda para BRL
+
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.getElementById(location.hash.substring(1))
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }, [location])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    if (code) {
+      handleCodeSubmit(code)
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
 
   const handleLoginClick = () => {
     navigate('/login')
@@ -36,26 +60,47 @@ export default function Home() {
     setShowQRModal(true)
   }
 
-  const handleDownload = (code: string) => {
-    // Redirecionar para URL de download
-    // Como o código já foi verificado no componente DownloadCodeInput, podemos prosseguir
-    const url = fileService.getDownloadUrl(code)
-    window.location.href = url
+  // Called when user enters code in the input
+  const handleCodeSubmit = async (code: string) => {
+    setDownloadCode(code)
+    setShowFileBrowser(true)
+  }
+
+  // Called when user clicks 'Download' inside the modal
+  const performDownload = async () => {
+    if (!downloadCode) return
+
+    try {
+      const blob = await fileService.downloadFile(downloadCode)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `arquivo-${downloadCode}` 
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      // Optional: Close modal after download starts?
+      // setShowFileBrowser(false) 
+    } catch (error) {
+      console.error('Download failed:', error)
+      alert('Erro ao baixar arquivo. Verifique se o código está correto e não expirou.')
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-[#f5f5f7] text-gray-900 font-sans">
       <Header onLoginClick={handleLoginClick} />
 
       <main>
         {/* Hero Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        <section className="w-[95%] max-w-[1304px] mx-auto pt-8 pb-16 md:pt-12 md:pb-24">
           <Hero />
 
           {/* Upload and Download Sections - Side by Side */}
           <ActionGrid 
             onUploadComplete={handleUploadComplete}
-            onDownload={handleDownload}
+            onDownload={handleCodeSubmit}
             onUpgradeClick={() => setShowUpgradeModal(true)}
           />
 
@@ -83,6 +128,18 @@ export default function Home() {
             setUploadCode(null)
             setExpirationDate(null)
           }}
+        />
+      )}
+
+      {/* File Browser Modal (VSCode Style) */}
+      {showFileBrowser && downloadCode && (
+        <FileBrowserModal
+          code={downloadCode}
+          onClose={() => {
+            setShowFileBrowser(false)
+            setDownloadCode(null)
+          }}
+          onDownload={performDownload}
         />
       )}
 

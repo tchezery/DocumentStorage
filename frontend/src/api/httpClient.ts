@@ -33,12 +33,7 @@ export const httpClient = {
 
   upload: async <T>(endpoint: string, files: File[], onProgress?: (progress: number) => void): Promise<T> => {
     const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-
-    // Get token for upload request since it uses a different config object structure (though instance defaults might not apply if we override too much, but here we use the instance 'api')
-    // Actually, api.post uses the interceptor. But we are passing a config object as the 3rd arg.
-    // Axios merges config. So the interceptor should still run and add headers.
-    // However, let's be safe. The interceptor modifies 'config', so it should work for all requests made via 'api'.
+    files.forEach(file => formData.append('file', file));
 
     const response = await api.post<T>(endpoint, formData, {
       headers: {
@@ -57,5 +52,12 @@ export const httpClient = {
 
   getUri: (endpoint: string): string => {
     return `${BASE_URL}${endpoint}`;
+  },
+
+  download: async (endpoint: string): Promise<Blob> => {
+    const response = await api.get(endpoint, {
+      responseType: 'blob',
+    });
+    return response.data;
   }
 };

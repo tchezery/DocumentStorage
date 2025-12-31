@@ -1,16 +1,21 @@
 import { httpClient } from '../api/httpClient';
-import { UploadResponse, CheckCodeResponse } from '../types/dtos';
+import { UploadResponse, FileNode } from '../types/dtos';
 
 export const fileService = {
   uploadFiles: async (files: File[], onProgress?: (progress: number) => void): Promise<UploadResponse> => {
-    return httpClient.upload<UploadResponse>('/upload', files, onProgress);
-  },
-
-  checkCode: async (code: string): Promise<CheckCodeResponse> => {
-    return httpClient.get<CheckCodeResponse>(`/files/${code}/check`);
+    return httpClient.upload<UploadResponse>('/file/upload', files, onProgress);
   },
 
   getDownloadUrl: (code: string): string => {
-    return httpClient.getUri(`/files/${code}/download`);
+    return httpClient.getUri(`/file/download/${code}`);
+  },
+
+  downloadFile: async (code: string): Promise<Blob> => {
+    return httpClient.download(`/file/download/${code}`);
+  },
+
+  getFileInfo: async (code: string): Promise<FileNode[]> => {
+    // This expects the backend to implement GET /file/info/{code} returning FileNode[]
+    return httpClient.get<FileNode[]>(`/file/info/${code}`);
   }
 };

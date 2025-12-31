@@ -4,6 +4,8 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useNavigate } from 'react-router-dom'
 import { formatMinPrice } from '../utils/pricing'
+import CardCarousel from '../components/ui/CardCarousel'
+import InfoCard from '../components/ui/InfoCard'
 
 export default function WhyUs() {
   const navigate = useNavigate()
@@ -12,154 +14,116 @@ export default function WhyUs() {
     navigate('/login')
   }
 
+  const benefits = [
+    {
+      icon: <TrendingDown className="h-8 w-8 text-blue-500" />,
+      title: "Preço que diminui",
+      description: `Quanto mais você usa, mais barato fica! O preço diminui progressivamente até chegar a ${formatMinPrice()} por GB.`
+    },
+    {
+      icon: <Shield className="h-8 w-8 text-green-500" />,
+      title: "100% Anônimo",
+      description: "Você não precisa criar conta. Seus documentos são protegidos com criptografia e você tem controle total."
+    },
+    {
+      icon: <Clock className="h-8 w-8 text-purple-500" />,
+      title: "Acesso Instantâneo",
+      description: "Guarde e recupere seus arquivos em segundos. Use o código ou QR Code de qualquer lugar."
+    },
+    {
+      icon: <DollarSign className="h-8 w-8 text-orange-500" />,
+      title: "Flexibilidade",
+      description: "Não pode pagar agora? Assista anúncios para ganhar armazenamento adicional."
+    },
+    {
+      icon: <Users className="h-8 w-8 text-pink-500" />,
+      title: "Feito para Você",
+      description: "Criado pensando em quem precisa usar computadores de terceiros e não pode salvar localmente."
+    },
+    {
+      icon: <Zap className="h-8 w-8 text-yellow-500" />,
+      title: "Sem Complicações",
+      description: "Interface simples e intuitiva. Sem termos complicados, apenas uma ferramenta que funciona."
+    }
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-[#f5f5f7] text-gray-900 font-sans">
       <Header onLoginClick={handleLoginClick} />
 
-      <main>
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+      <main className="w-[95%] max-w-[1304px] mx-auto py-16 md:py-24">
+        <Link
+          to="/"
+          className="inline-flex items-center space-x-2 text-gray-500 hover:text-gray-900 mb-12 transition-colors font-medium text-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Voltar</span>
+        </Link>
+
+        <div className="mb-16">
+          <h1 className="text-5xl md:text-6xl font-semibold mb-6 tracking-tight text-gray-900">
+            Por que somos a melhor opção.
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-500 max-w-2xl font-medium leading-relaxed">
+            Entendemos suas necessidades e criamos uma solução que realmente funciona para você.
+          </p>
+        </div>
+
+        {/* Benefits Carousel */}
+        <div className="mb-24">
+          <CardCarousel>
+            {benefits.map((benefit, index) => (
+              <InfoCard key={index} width="w-[300px] sm:w-[340px]">
+                <div className="mb-6">
+                  {benefit.icon}
+                </div>
+                <h3 className="font-semibold text-xl mb-3 text-gray-900">{benefit.title}</h3>
+                <p className="text-gray-500 font-medium leading-relaxed">
+                  {benefit.description}
+                </p>
+              </InfoCard>
+            ))}
+          </CardCarousel>
+        </div>
+
+        {/* Pricing Example */}
+        <div className="bg-white rounded-3xl p-10 md:p-14 card-shadow mb-24">
+
+          <div className="max-w-3xl">
+            <h2 className="text-3xl font-semibold mb-6 tracking-tight text-gray-900">Como funciona o desconto?</h2>
+            <p className="text-xl text-gray-500 font-medium mb-10 leading-relaxed">
+              A cada uso, você ganha um pequeno desconto. É nossa forma de dizer obrigado por confiar em nós.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Primeira vez</p>
+                <p className="text-4xl font-semibold text-gray-900 mb-1">$1 USD</p>
+                <p className="text-gray-500 font-medium">por GB</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Com o tempo</p>
+                <p className="text-4xl font-semibold text-gray-900 mb-1">$0.98 → $0.50</p>
+                <p className="text-gray-500 font-medium">desconto progressivo</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Preço mínimo</p>
+                <p className="text-4xl font-semibold text-gray-900 mb-1">{formatMinPrice()}</p>
+                <p className="text-gray-500 font-medium">por GB (≈ R$ 2,00)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="text-left border-t border-gray-200 pt-16">
           <Link
             to="/"
-            className="inline-flex items-center space-x-2 text-gray-600 hover:text-apple-blue mb-8"
+            className="inline-flex items-center px-8 py-4 bg-[#0071e3] text-white rounded-full font-medium hover:bg-[#0077ed] transition-colors text-lg"
           >
-            <ArrowLeft className="h-5 w-5" />
-            <span>Voltar</span>
+            Começar Agora
           </Link>
-
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 pb-4 bg-gradient-to-r from-apple-blue to-blue-600 bg-clip-text text-transparent leading-normal">
-              Por que somos a melhor opção?
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Entendemos suas necessidades e criamos uma solução que realmente funciona para você
-            </p>
-          </div>
-
-          {/* Main Benefits */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            <div className="bg-white rounded-2xl p-8 card-shadow-lg">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-6">
-                <TrendingDown className="h-8 w-8 text-apple-blue" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">Preço que diminui com o uso</h2>
-              <p className="text-gray-600 mb-4">
-                Quanto mais você usa nosso serviço, mais barato fica! Começando em $1 USD por GB, 
-                o preço vai diminuindo progressivamente até chegar a apenas {formatMinPrice()} por GB 
-                (equivalente a R$ 2,00 baseado na cotação atual do dólar).
-              </p>
-              <p className="text-sm text-gray-500">
-                É nossa forma de recompensar sua fidelidade e uso contínuo.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 card-shadow-lg">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-6">
-                <Shield className="h-8 w-8 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">100% Anônimo e Seguro</h2>
-              <p className="text-gray-600 mb-4">
-                Você não precisa criar conta para usar. Seus documentos são protegidos com 
-                criptografia e você tem controle total sobre quem acessa.
-              </p>
-              <p className="text-sm text-gray-500">
-                Privacidade é um direito, não um privilégio.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 card-shadow-lg">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mb-6">
-                <Clock className="h-8 w-8 text-purple-600" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">Acesso Instantâneo</h2>
-              <p className="text-gray-600 mb-4">
-                Guarde e recupere seus arquivos em segundos. Use o código ou QR Code de 
-                qualquer dispositivo, de qualquer lugar.
-              </p>
-              <p className="text-sm text-gray-500">
-                Simples, rápido e eficiente.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 card-shadow-lg">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mb-6">
-                <DollarSign className="h-8 w-8 text-orange-600" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">Flexibilidade de Pagamento</h2>
-              <p className="text-gray-600 mb-4">
-                Não pode pagar agora? Sem problemas! Você pode assistir anúncios para ganhar 
-                armazenamento adicional. Escolha a opção que funciona melhor para você.
-              </p>
-              <p className="text-sm text-gray-500">
-                Acreditamos em dar opções, não em criar barreiras.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 card-shadow-lg">
-              <div className="w-16 h-16 bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mb-6">
-                <Users className="h-8 w-8 text-pink-600" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">Feito para Você</h2>
-              <p className="text-gray-600 mb-4">
-                Criado pensando em pessoas que precisam usar computadores de terceiros e 
-                não podem salvar arquivos localmente. Entendemos sua situação.
-              </p>
-              <p className="text-sm text-gray-500">
-                Por pessoas reais, para pessoas reais.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 card-shadow-lg">
-              <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-2xl flex items-center justify-center mb-6">
-                <Zap className="h-8 w-8 text-yellow-600" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">Sem Complicações</h2>
-              <p className="text-gray-600 mb-4">
-                Interface simples e intuitiva. Sem termos complicados, sem pegadinhas. 
-                Apenas uma ferramenta que funciona.
-              </p>
-              <p className="text-sm text-gray-500">
-                Tecnologia acessível para todos.
-              </p>
-            </div>
-          </div>
-
-          {/* Pricing Example */}
-          <div className="bg-gradient-to-br from-apple-blue to-blue-600 rounded-2xl p-8 md:p-12 text-white mb-16">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-6">Como funciona o desconto progressivo?</h2>
-              <p className="text-lg mb-8 opacity-90">
-                A cada uso, você ganha um pequeno desconto. É nossa forma de dizer obrigado por confiar em nós!
-              </p>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                  <p className="text-sm opacity-80 mb-2">Primeira vez</p>
-                  <p className="text-3xl font-bold mb-2">$1 USD</p>
-                  <p className="text-sm opacity-80">por GB</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                  <p className="text-sm opacity-80 mb-2">Com o tempo</p>
-                  <p className="text-3xl font-bold mb-2">$0.98 → $0.50</p>
-                  <p className="text-sm opacity-80">desconto progressivo</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                  <p className="text-sm opacity-80 mb-2">Preço mínimo</p>
-                  <p className="text-3xl font-bold mb-2">{formatMinPrice()}</p>
-                  <p className="text-sm opacity-80">por GB (≈ R$ 2,00)</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center">
-            <Link
-              to="/"
-              className="inline-block px-8 py-4 bg-apple-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors text-lg"
-            >
-              Começar Agora
-            </Link>
-          </div>
-        </section>
+        </div>
       </main>
 
       <Footer />
