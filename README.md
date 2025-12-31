@@ -46,9 +46,9 @@ It is built as a full-stack application composed of a .NET backend and a React f
 - [x] Basic Frontend Routing
 - [x] UI Components (Home, Forms, Modals)
 - [x] Storage Upgrade UI (Ads and PIX integration layouts)
+- [x] File Upload & Download Logic (Frontend components exist, Backend controller missing)
 
 ### 🚧 In Progress
-- [ ] File Upload & Download Logic (Frontend components exist, Backend controller missing)
 - [ ] File Storage Service Implementation (Local/Cloud)
 - [ ] Ad-Reward Integration (Connect frontend ad logic to backend storage limits)
 
