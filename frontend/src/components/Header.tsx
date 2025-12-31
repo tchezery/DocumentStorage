@@ -6,41 +6,50 @@ interface HeaderProps {
 }
 
 export default function Header({ onLoginClick }: HeaderProps) {
+  const handleScrollToTop = (e: React.MouseEvent) => {
+    if (window.location.pathname === '/') {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
   return (
-    <header className="sticky top-0 z-50 glass-effect border-b border-gray-200/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-apple-blue rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">D</span>
+    <header className="sticky top-0 z-50 glass-effect border-b border-gray-200/50 backdrop-blur-md bg-white/70">
+      <div className="w-[95%] max-w-[1304px] mx-auto">
+        <div className="flex items-center justify-between h-12">
+          <Link to="/" onClick={handleScrollToTop} className="flex items-center space-x-2">
+            <div className="w-6 h-6 bg-gray-900 rounded-md flex items-center justify-center">
+              <span className="text-white font-bold text-sm">D</span>
             </div>
-            <span className="text-xl font-semibold">Document Storage</span>
+            <div className="flex items-baseline space-x-2">
+              <span className="text-lg font-semibold text-gray-900 tracking-tight">Document Storage</span>
+              <Link to="/#projeto" className="text-[10px] text-gray-400 font-medium whitespace-nowrap hover:text-gray-600 transition-colors">by Tchézery Ribeiro</Link>
+            </div>
           </Link>
           
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/#sobre" className="text-gray-600 hover:text-apple-blue transition-colors">
-              Sobre
+          <nav className="hidden md:flex items-center space-x-8 text-xs font-medium text-gray-600">
+            <Link to="/" onClick={handleScrollToTop} className="hover:text-gray-900 transition-colors">
+              Início
             </Link>
-            <Link to="/por-que-somos-melhor" className="text-gray-600 hover:text-apple-blue transition-colors">
-              Por que Somos Melhor
+            <Link to="/porque-somos-melhor" className="hover:text-gray-900 transition-colors">
+              Porque Somos Melhor
             </Link>
-            <Link to="/transparencia" className="text-gray-600 hover:text-apple-blue transition-colors">
+            <Link to="/transparencia" className="hover:text-gray-900 transition-colors">
               Transparência
             </Link>
             <button
               onClick={onLoginClick}
-              className="flex items-center space-x-2 px-4 py-2 bg-apple-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="flex items-center space-x-1 px-3 py-1 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors text-xs"
             >
-              <LogIn size={18} />
               <span>Login</span>
             </button>
           </nav>
           
           <button
             onClick={onLoginClick}
-            className="md:hidden p-2 text-gray-600 hover:text-apple-blue"
+            className="md:hidden p-2 text-gray-900"
           >
-            <LogIn size={24} />
+            <LogIn size={20} />
           </button>
         </div>
       </div>

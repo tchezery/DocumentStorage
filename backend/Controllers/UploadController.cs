@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[Route("api/")]
+[Route("api/file")]
 
 public class UploadController : ControllerBase
 {

@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '../components/Header'
 import QRCodeModal from '../components/QRCodeModal'
 import StorageUpgradeModal from '../components/StorageUpgradeModal'
-import { fileService } from '../services/fileService'
+import FileBrowserModal from '../components/FileBrowserModal'
 
 import Hero from '../components/home/Hero'
 import ActionGrid from '../components/home/ActionGrid'
@@ -14,15 +14,37 @@ import Footer from '../components/Footer'
 
 export default function Home() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [showQRModal, setShowQRModal] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showFileBrowser, setShowFileBrowser] = useState(false)
+  
   const [uploadCode, setUploadCode] = useState<string | null>(null)
+  const [downloadCode, setDownloadCode] = useState<string | null>(null)
   const [expirationDate, setExpirationDate] = useState<Date | null>(null)
   const [adsWatched, setAdsWatched] = useState(0) // Rastrear anúncios assistidos
   
   // Simular preço atual (será calculado pelo backend baseado no uso)
   const [currentPrice] = useState(1.0) // $1 USD inicial
   const [isUSD] = useState(true) // Começa em USD, depois muda para BRL
+
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.getElementById(location.hash.substring(1))
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }, [location])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    if (code) {
+      handleDownload(code)
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
 
   const handleLoginClick = () => {
     navigate('/login')
@@ -37,19 +59,17 @@ export default function Home() {
   }
 
   const handleDownload = (code: string) => {
-    // Redirecionar para URL de download
-    // Como o código já foi verificado no componente DownloadCodeInput, podemos prosseguir
-    const url = fileService.getDownloadUrl(code)
-    window.location.href = url
+    setDownloadCode(code)
+    setShowFileBrowser(true)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-[#f5f5f7] text-gray-900 font-sans">
       <Header onLoginClick={handleLoginClick} />
 
       <main>
         {/* Hero Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        <section className="w-[95%] max-w-[1304px] mx-auto pt-8 pb-16 md:pt-12 md:pb-24">
           <Hero />
 
           {/* Upload and Download Sections - Side by Side */}
@@ -82,6 +102,17 @@ export default function Home() {
             setShowQRModal(false)
             setUploadCode(null)
             setExpirationDate(null)
+          }}
+        />
+      )}
+
+      {/* File Browser Modal */}
+      {showFileBrowser && downloadCode && (
+        <FileBrowserModal
+          code={downloadCode}
+          onClose={() => {
+            setShowFileBrowser(false)
+            setDownloadCode(null)
           }}
         />
       )}

@@ -146,16 +146,17 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
 
         {files.length === 0 ? (
           <>
-            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium mb-2">
-              Arraste arquivos aqui ou clique para selecionar
+            <Upload className="mx-auto h-12 w-12 text-gray-300 mb-6" />
+            <p className="text-xl font-semibold mb-2 text-gray-900 tracking-tight">
+              Arraste arquivos aqui
             </p>
-            <p className="text-sm text-gray-500 mb-4">
-              Máximo {maxSizeGB}GB por arquivo
+            <p className="text-sm text-gray-500 mb-8 font-medium">
+              Ou clique para selecionar. Máximo {maxSizeGB}GB por arquivo.
             </p>
             <Button
               onClick={() => fileInputRef.current?.click()}
-              variant="outline"
+              variant="secondary"
+              className="mx-auto"
             >
               Selecionar Arquivos
             </Button>

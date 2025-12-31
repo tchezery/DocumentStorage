@@ -9,4 +9,4 @@ export const authService = {
   register: async (data: RegisterData): Promise<LoginResponse> => {
     return httpClient.post<LoginResponse>('/auth/register', data);
   }
-};
+};+6

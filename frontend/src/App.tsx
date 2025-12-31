@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import WhyUs from './pages/WhyUs'
 import Transparency from './pages/Transparency'
+import FloatingUploadButton from './components/FloatingUploadButton'
 
 function App() {
   return (
@@ -12,9 +13,10 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/por-que-somos-melhor" element={<WhyUs />} />
+        <Route path="/porque-somos-melhor" element={<WhyUs />} />
         <Route path="/transparencia" element={<Transparency />} />
       </Routes>
+      <FloatingUploadButton />
     </Router>
   )
 }

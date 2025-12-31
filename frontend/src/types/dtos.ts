@@ -3,6 +3,17 @@ export interface UploadResponse {
   expiresAt: string;
 }
 
+export type FileType = 'file' | 'folder';
+
+export interface FileNode {
+  name: string;
+  type: FileType;
+  size?: number; // Optional for folders
+  date: string;
+  children?: FileNode[]; // Only for folders
+  path: string; // Full path for download/navigation
+}
+
 export interface FileMetadata {
   filename: string;
   size: number;
@@ -12,6 +23,7 @@ export interface FileMetadata {
 export interface CheckCodeResponse {
   valid: boolean;
   files?: FileMetadata[];
+  structure?: FileNode[]; // Added for browser
   expiresAt?: string;
   downloadUrl?: string;
 }
