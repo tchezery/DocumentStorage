@@ -59,6 +59,8 @@ builder.Services.AddSingleton<ITokenService>(
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<FileService>();
+
 var app = builder.Build();
 
 //temporary

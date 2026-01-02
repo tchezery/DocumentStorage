@@ -6,10 +6,6 @@ export const fileService = {
     return httpClient.upload<UploadResponse>('/file/upload', files, onProgress);
   },
 
-  getDownloadUrl: (code: string): string => {
-    return httpClient.getUri(`/file/download/${code}`);
-  },
-
   downloadFile: async (code: string): Promise<Blob> => {
     return httpClient.download(`/file/download/${code}`);
   },
