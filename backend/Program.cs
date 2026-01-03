@@ -60,6 +60,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<FileService>();
+builder.Services.AddScoped<FileStorageService>();
 
 var app = builder.Build();
 

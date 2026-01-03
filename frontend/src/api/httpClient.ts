@@ -50,6 +50,26 @@ export const httpClient = {
     return response.data;
   },
 
+  uploadWithPaths: async <T>(endpoint: string, files: File[], paths: string[], onProgress?: (progress: number) => void): Promise<T> => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    paths.forEach(path => formData.append('paths', path));
+
+    const response = await api.post<T>(endpoint, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percentComplete = (progressEvent.loaded / progressEvent.total) * 100;
+          onProgress(percentComplete);
+        }
+      },
+    });
+
+    return response.data;
+  },
+
   getUri: (endpoint: string): string => {
     return `${BASE_URL}${endpoint}`;
   },
