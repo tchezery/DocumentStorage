@@ -58,3 +58,53 @@ It is built as a full-stack application composed of a .NET backend and a React f
 - [ ] User Dashboard to view stored files
 - [ ] Integration with a Real Payment Gateway for PIX
 - [ ] Real Ad Provider integration (currently simulated)
+
+## 🏃‍♂️ Running the Application
+
+### 🐳 With Docker (Recommended)
+
+To run the entire stack (Frontend + Backend) using Docker Compose:
+
+1. Ensure you have Docker and Docker Compose installed.
+2. Run the following command in the root directory:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+3. Access the services:
+   - **Frontend**: [http://localhost:5173](http://localhost:5173)
+   - **Backend API**: [http://localhost:5116](http://localhost:5116)
+
+The database will be persisted in a `./docker_data` folder in the root directory.
+
+### 💻 Development (Manual)
+
+To run the services individually for development:
+
+#### Backend
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create a `.env` file based on `.env.example` and set your `JWT_KEY`.
+3. Run the application:
+   ```bash
+   dotnet run
+   ```
+   The backend will start on port **5116**.
+
+#### Frontend
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+   The frontend will start on port **5173** and is configured to proxy requests to the backend on port 5116.
