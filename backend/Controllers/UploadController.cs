@@ -38,7 +38,8 @@ public class UploadController : ControllerBase
         {
             Name = "root",
             Type = "folder",
-            ParentId = null
+            ParentId = null,
+            ExpiresAt = DateTime.UtcNow.AddDays(3)
         };
 
         _context.FileNode.Add(root);

@@ -62,6 +62,8 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<FileStorageService>();
 
+builder.Services.AddHostedService<FileCleanUpService>();
+
 var app = builder.Build();
 
 //temporary
