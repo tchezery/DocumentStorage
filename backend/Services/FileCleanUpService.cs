@@ -1,7 +1,7 @@
-using System.Data;
-using System.Reflection.PortableExecutable;
-using backend.Data;
 using Microsoft.EntityFrameworkCore;
+
+using backend.Data;
+using backend.Models;
 
 namespace backend.Services;
 
@@ -10,7 +10,7 @@ public class FileCleanUpService : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<FileCleanUpService> _logger;
 
-    public FileCleanUpService(IServiceProvider serviceProvider, ILogger<FileCleanUpSerive> logger)
+    public FileCleanUpService(IServiceProvider serviceProvider, ILogger<FileCleanUpService> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -38,7 +38,8 @@ public class FileCleanUpService : BackgroundService
     private async Task DoCleanUpAsync()
     {
         using var scope = _serviceProvider.CreateScope();
-        var context = scope.serviceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
 
         var expireRoots = await context.FileNode
             .Where(n => n.ParentId == null && n.ExpiresAt < DateTime.UtcNow)
@@ -92,7 +93,7 @@ public class FileCleanUpService : BackgroundService
         }
     }
 
-    private async Task<List<FileNode>> GetAllDescendants(AppDbContext context, init parentId)
+    private async Task<List<FileNode>> GetAllDescendants(AppDbContext context, int parentId)
     {
         var result = new List<FileNode>();
         var children = await context.FileNode.Where(n => n.ParentId == parentId).ToListAsync();
