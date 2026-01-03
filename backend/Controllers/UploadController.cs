@@ -21,6 +21,7 @@ public class UploadController : ControllerBase
 
     [HttpPost("uploadV2")]
     [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
     public async Task<IActionResult> UploadV2(List<IFormFile> files, [FromForm] List<string> paths)
     {
         if (files == null || files.Count == 0)
@@ -42,6 +43,8 @@ public class UploadController : ControllerBase
 
         _context.FileNode.Add(root);
         await _context.SaveChangesAsync();
+
+        root.Name = root.Id.ToString();
 
         for (int i = 0; i < files.Count; i++)
         {
@@ -107,31 +110,38 @@ public class UploadController : ControllerBase
         return folder;
     }
 
-    [HttpGet("download/{id}")]
-    public async Task<IActionResult> DownloadV2(int id)
+    [HttpGet("downloadV2/{code}")]
+    public async Task<IActionResult> DownloadV2(int code)
     {
+
         var root = await _context.FileNode
-            .Include(n => n.Blob)
-            .FirstOrDefaultAsync(n => n.Id == id);
+            .FirstOrDefaultAsync(n => n.Id == code);
         
         if (root == null)
         {
             return NotFound("Node não encontrado");
         }
 
-        using var memoryStream = new MemoryStream();
+        var memoryStream = new MemoryStream();
 
         using (var zip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
         {
-            await AddNodeToZip(zip, root, "");
+            var children = await _context.FileNode
+                .Where(n => n.ParentId == root.Id)
+                .ToListAsync();
+
+            foreach (var child in children)
+            {
+                await AddNodeToZip(zip, child, "");
+            }
         }
 
         memoryStream.Position = 0;
 
         return File(
-            memoryStream.ToArray(),
+            memoryStream,
             "application/zip",
-            $"{root.Name}.zip"
+            $"DS{root.Name}.zip"
         );
     }
 

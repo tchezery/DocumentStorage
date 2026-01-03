@@ -71,11 +71,11 @@ export default function Home() {
     if (!downloadCode) return
 
     try {
-      const blob = await fileService.downloadFile(downloadCode)
+      const { blob, filename } = await fileService.downloadFolderZip(downloadCode)
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `arquivo-${downloadCode}` 
+      a.download = filename || `arquivo-${downloadCode}` 
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
