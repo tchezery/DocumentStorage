@@ -4,18 +4,182 @@ using System.IO.Compression;
 
 using backend.Data;
 using backend.Models;
-using System.Reflection.PortableExecutable;
+using backend.Services;
 
 [ApiController]
 [Route("api/file")]
 public class UploadController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly FileStorageService _fileStorageService;
 
-    public UploadController(AppDbContext context)
+    public UploadController(AppDbContext context, FileStorageService fileStorageService)
     {
         _context = context;
+        _fileStorageService = fileStorageService;
     }
+
+    [HttpPost("uploadV2")]
+    [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
+    public async Task<IActionResult> UploadV2(List<IFormFile> files, [FromForm] List<string> paths)
+    {
+        if (files == null || files.Count == 0)
+        {
+            return BadRequest("Nenhum arquivo identificado");
+        }
+
+        if (paths == null || paths.Count == 0)
+        {
+            return BadRequest("Arquivos e paths não correspondem");
+        }
+
+        var root = new FileNode
+        {
+            Name = "root",
+            Type = "folder",
+            ParentId = null
+        };
+
+        _context.FileNode.Add(root);
+        await _context.SaveChangesAsync();
+
+        root.Name = root.Id.ToString();
+
+        for (int i = 0; i < files.Count; i++)
+        {
+            var parts = paths[i]
+                .Replace("\\", "/")
+                .Split('/', StringSplitOptions.RemoveEmptyEntries);
+                
+            int? parentId = root.Id;
+
+            // cria a estrturura de pastas
+            for (int p = 0; p < parts.Length - 1; p++)
+            {
+                var folder = await GetOrCreateFolder(parts[p], parentId);
+                parentId = folder.Id;
+            }
+
+            // salva o arquivo como blob
+            var blob = await _fileStorageService.GetOrCreateBlobAsync(files[i]);
+
+            // cria o node no banco
+            var node = new FileNode
+            {
+                Name = parts[^1],
+                Type = "file",
+                ParentId = parentId,
+                BlobId = blob.Id
+            };
+
+            _context.FileNode.Add(node);
+        }
+
+        await _context.SaveChangesAsync();
+        
+        return Ok(new
+        {
+            code = root.Id
+        });
+    }
+
+    private async Task<FileNode> GetOrCreateFolder(string name, int? parentId)
+    {
+        var folder = await _context.FileNode.FirstOrDefaultAsync(f => 
+            f.Name == name &&
+            f.ParentId == parentId &&
+            f.Type == "folder"
+        );
+
+        if (folder != null)
+        {
+            return folder;
+        }
+
+        folder = new FileNode
+        {
+            Name = name,
+            Type = "folder",
+            ParentId = parentId
+        };
+
+        _context.FileNode.Add(folder);
+        await _context.SaveChangesAsync();
+
+        return folder;
+    }
+
+    [HttpGet("downloadV2/{code}")]
+    public async Task<IActionResult> DownloadV2(int code)
+    {
+
+        var root = await _context.FileNode
+            .FirstOrDefaultAsync(n => n.Id == code);
+        
+        if (root == null)
+        {
+            return NotFound("Node não encontrado");
+        }
+
+        var memoryStream = new MemoryStream();
+
+        using (var zip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+        {
+            var children = await _context.FileNode
+                .Where(n => n.ParentId == root.Id)
+                .ToListAsync();
+
+            foreach (var child in children)
+            {
+                await AddNodeToZip(zip, child, "");
+            }
+        }
+
+        memoryStream.Position = 0;
+
+        return File(
+            memoryStream,
+            "application/zip",
+            $"DS{root.Name}.zip"
+        );
+    }
+
+    private async Task AddNodeToZip(ZipArchive zip, FileNode node, string currentPath)
+    {
+        var path = string.IsNullOrEmpty(currentPath) ? node.Name : $"{currentPath}/{node.Name}";
+
+        if (node.Type == "file")
+        {
+            if (node.Blob == null)
+            {
+                node = await _context.FileNode
+                    .Include(n => n.Blob)
+                    .FirstAsync(n => n.Id == node.Id);
+            }
+
+            var entry = zip.CreateEntry(path);
+
+            using var entryStream = entry.Open();
+            using var fileStream = System.IO.File.OpenRead(node.Blob!.StoragePath);
+            
+            await fileStream.CopyToAsync(entryStream);
+            return;
+        }
+
+        var children = await _context.FileNode
+            .Where(n => n.ParentId == node.Id)
+            .ToListAsync();
+
+        foreach (var child in children)
+        {
+            await AddNodeToZip(zip, child, path);
+        }
+    }
+
+//==================================================================================
+// Modelo Antigo Funcional (Arquivo Único)
+//==================================================================================
 
     [HttpPost("upload")]
     [DisableRequestSizeLimit]

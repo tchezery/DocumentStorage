@@ -83,7 +83,7 @@ const FileRow = ({ node, level, onToggle }: { node: FileNode, level: number, onT
 }
 
 export default function FileBrowserModal({ code, onClose, onDownload }: FileBrowserModalProps) {
-  const [structure, setStructure] = useState<FileNode[]>([])
+  const [structure, setStructure] = useState<FileNode | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -94,20 +94,7 @@ export default function FileBrowserModal({ code, onClose, onDownload }: FileBrow
         setStructure(data)
       } catch (err) {
         console.error(err)
-        // Fallback fake data for demonstration if backend fails (since user might not have endpoint yet)
-        // Remove this fallback when backend is ready
-        setStructure([
-          { name: 'src', type: 'folder', date: '', path: 'src', children: [
-            { name: 'App.tsx', type: 'file', size: 2048, date: '', path: 'src/App.tsx' },
-            { name: 'main.tsx', type: 'file', size: 1024, date: '', path: 'src/main.tsx' },
-            { name: 'components', type: 'folder', date: '', path: 'src/components', children: [
-               { name: 'Button.tsx', type: 'file', size: 500, date: '', path: 'src/components/Button.tsx' }
-            ]}
-          ]},
-          { name: 'package.json', type: 'file', size: 1500, date: '', path: 'package.json' },
-          { name: 'README.md', type: 'file', size: 3000, date: '', path: 'README.md' },
-        ])
-        setError('Não foi possível carregar a estrutura real (endpoint /file/info faltando?). Exibindo dados de exemplo.')
+        setError('Não foi possível carregar a estrutura de arquivos.')
       } finally {
         setLoading(false)
       }
@@ -139,19 +126,25 @@ export default function FileBrowserModal({ code, onClose, onDownload }: FileBrow
           {loading ? (
              <div className="flex items-center justify-center h-full text-[#cccccc]">
                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#007acc] mr-2"></div>
-               Loading structure...
+               Carregando estrutura...
              </div>
           ) : (
             <>
               {error && (
-                <div className="mb-2 p-2 bg-yellow-900/30 text-yellow-200 text-xs border border-yellow-700/50 rounded">
-                  WARN: {error}
+                <div className="mb-2 p-2 bg-red-900/30 text-red-200 text-xs border border-red-700/50 rounded">
+                  ERRO: {error}
                 </div>
               )}
               <div className="select-none">
-                {structure.map(node => (
-                  <FileRow key={node.path} node={node} level={0} onToggle={() => {}} />
-                ))}
+                {structure && (
+                  structure.name === 'root' && structure.children ? (
+                    structure.children.map(child => (
+                      <FileRow key={child.path} node={child} level={0} onToggle={() => {}} />
+                    ))
+                  ) : (
+                    <FileRow node={structure} level={0} onToggle={() => {}} />
+                  )
+                )}
               </div>
             </>
           )}

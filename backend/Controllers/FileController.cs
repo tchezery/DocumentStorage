@@ -1,31 +1,33 @@
-using System.Reflection.PortableExecutable;
 using Microsoft.AspNetCore.Mvc;
 
 using backend.Services;
+using backend.Dtos;
 
 [ApiController]
 [Route("api/file")]
 public class FileController : ControllerBase
 {
-    private readonly FileService _fileService;
+    private readonly FileStorageService _fileStorageService;
 
-    public FileController(FileService fileService)
+    public FileController(FileStorageService fileStorageService)
     {
-        _fileService = fileService;
+        _fileStorageService = fileStorageService;
     }
 
-    [HttpGet("info/{code}")]
-    public IActionResult GetFileInfo(string code)
+    [HttpGet("infoV2/{code}")]
+    public async Task<IActionResult> GetFileInfo(int code)
     {
-        try
+        var tree = await _fileStorageService.GetFileTreeAsync(code);
+
+        if (tree == null)
         {
-            var result = _fileService.GetFileTree(code);
-            return Ok(result);
+            return NotFound(new { message = "Root não encontrado"});
         }
-        catch (DirectoryNotFoundException)
-        {
-            Console.WriteLine($"Código {code} não encontrado");
-            return NotFound(new { message = "Código não encontrado." });
-        }
+
+        var dto = FileNodeMapper.MapToDto(tree);
+
+        return Ok(dto
+        );
+    
     }
 }

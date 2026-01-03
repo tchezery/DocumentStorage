@@ -8,7 +8,7 @@ public class FileService
 {
     private readonly string _storageRoot = "Uploads";
 
-    public List<FileNode> GetFileTree(string code)
+    public List<FileNodeDto> GetFileTree(string code)
     {
         var basePath = Path.Combine(_storageRoot, code);
 
@@ -20,16 +20,16 @@ public class FileService
         return ReadDirectory(basePath, basePath);
     }
 
-    private List<FileNode> ReadDirectory(string currentPath, string basePath)
+    private List<FileNodeDto> ReadDirectory(string currentPath, string basePath)
     {
-        var nodes = new List<FileNode>();
+        var nodes = new List<FileNodeDto>();
 
         // Folder
         foreach (var dir in Directory.GetDirectories(currentPath))
         {
             var dirInfo = new DirectoryInfo(dir);
 
-            nodes.Add(new FileNode
+            nodes.Add(new FileNodeDto
             {
                 Name = dirInfo.Name,
                 Type = "folder",
@@ -44,7 +44,7 @@ public class FileService
         {
             var fileInfo = new FileInfo(file);
 
-            nodes.Add(new FileNode
+            nodes.Add(new FileNodeDto
             {
                 Name = fileInfo.Name,
                 Type = "file",

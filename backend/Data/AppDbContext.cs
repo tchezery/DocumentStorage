@@ -10,4 +10,6 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Files> Files { get; set; }
+    public DbSet<FileBlob> FileBlob { get; set; }
+    public DbSet<FileNode> FileNode { get; set; }
 }

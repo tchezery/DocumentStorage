@@ -50,14 +50,46 @@ export const httpClient = {
     return response.data;
   },
 
+  uploadWithPaths: async <T>(endpoint: string, files: File[], paths: string[], onProgress?: (progress: number) => void): Promise<T> => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    paths.forEach(path => formData.append('paths', path));
+
+    const response = await api.post<T>(endpoint, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percentComplete = (progressEvent.loaded / progressEvent.total) * 100;
+          onProgress(percentComplete);
+        }
+      },
+    });
+
+    return response.data;
+  },
+
   getUri: (endpoint: string): string => {
     return `${BASE_URL}${endpoint}`;
   },
 
-  download: async (endpoint: string): Promise<Blob> => {
+  download: async (endpoint: string): Promise<{ blob: Blob; filename: string | null }> => {
     const response = await api.get(endpoint, {
       responseType: 'blob',
     });
-    return response.data;
+    
+    let filename: string | null = null;
+    const disposition = response.headers['content-disposition'];
+    
+    if (disposition && disposition.indexOf('attachment') !== -1) {
+      const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+      const matches = filenameRegex.exec(disposition);
+      if (matches != null && matches[1]) { 
+        filename = matches[1].replace(/['"]/g, '');
+      }
+    }
+
+    return { blob: response.data, filename };
   }
 };
