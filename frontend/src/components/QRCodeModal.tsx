@@ -70,8 +70,8 @@ export default function QRCodeModal({ code, expirationDate, onClose }: QRCodeMod
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-3xl max-w-md w-full p-8 animate-slide-up card-shadow-lg">
-        <div className="flex items-center justify-between mb-8">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 animate-slide-up card-shadow-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6 md:mb-8 sticky top-0 bg-white z-10 pb-2">
           <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Upload Concluído</h2>
           <button
             onClick={onClose}
