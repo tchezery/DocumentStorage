@@ -22,13 +22,14 @@ if (string.IsNullOrWhiteSpace(jwtKey))
 //CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("Dev", policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+    options.AddPolicy("Dev", 
+        policy =>
+        {
+            policy
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
 });
 
 

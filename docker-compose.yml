@@ -8,7 +8,7 @@ services:
       - "5116:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - JWT_KEY=super_secret_key_change_me_in_prod
+      - JWT_KEY=${JWT_KEY:-super_secret_key_change_me_in_prod}
       - ConnectionStrings__Default=Data Source=db/document-storage.db
     volumes:
       - ./docker_data/db:/app/db
@@ -18,7 +18,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=http://localhost:5116/api
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:5116/api}
     container_name: document-storage-frontend
     ports:
       - "5173:80"

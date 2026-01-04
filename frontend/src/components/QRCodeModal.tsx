@@ -38,40 +38,40 @@ export default function QRCodeModal({ code, expirationDate, onClose }: QRCodeMod
     URL.revokeObjectURL(url)
   }
 
-  const handleEmail = () => {
-    const subject = encodeURIComponent('Código de Download - Document Storage')
-    const body = encodeURIComponent(
-      `Seu código de download é: ${code}\n\n` +
-      `Data de Expiração: ${formattedDate}\n` +
-      `Dias Restantes: ${daysRemaining}`
-    )
-    window.location.href = `mailto:?subject=${subject}&body=${body}`
-  }
+  // const handleEmail = () => {
+  //   const subject = encodeURIComponent('Código de Download - Document Storage')
+  //   const body = encodeURIComponent(
+  //     `Seu código de download é: ${code}\n\n` +
+  //     `Data de Expiração: ${formattedDate}\n` +
+  //     `Dias Restantes: ${daysRemaining}`
+  //   )
+  //   window.location.href = `mailto:?subject=${subject}&body=${body}`
+  // }
 
-  const handleWhatsApp = () => {
-    const message = encodeURIComponent(
-      `Código de Download: ${code}\n` +
-      `Data de Expiração: ${formattedDate}\n` +
-      `Dias Restantes: ${daysRemaining}`
-    )
-    window.open(`https://wa.me/?text=${message}`, '_blank')
-  }
+  // const handleWhatsApp = () => {
+  //   const message = encodeURIComponent(
+  //     `Código de Download: ${code}\n` +
+  //     `Data de Expiração: ${formattedDate}\n` +
+  //     `Dias Restantes: ${daysRemaining}`
+  //   )
+  //   window.open(`https://wa.me/?text=${message}`, '_blank')
+  // }
 
-  const handleSMS = () => {
-    const message = encodeURIComponent(
-      `Código de Download: ${code}\n` +
-      `Data de Expiração: ${formattedDate}`
-    )
-    window.location.href = `sms:?body=${message}`
-  }
+  // const handleSMS = () => {
+  //   const message = encodeURIComponent(
+  //     `Código de Download: ${code}\n` +
+  //     `Data de Expiração: ${formattedDate}`
+  //   )
+  //   window.location.href = `sms:?body=${message}`
+  // }
 
   // QR Code now points to the app with the code as a parameter
   const qrCodeValue = `${window.location.origin}/?code=${code}`
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-3xl max-w-md w-full p-8 animate-slide-up card-shadow-lg">
-        <div className="flex items-center justify-between mb-8">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 animate-slide-up card-shadow-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6 md:mb-8 sticky top-0 bg-white z-10 pb-2">
           <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Upload Concluído</h2>
           <button
             onClick={onClose}
@@ -131,28 +131,28 @@ export default function QRCodeModal({ code, expirationDate, onClose }: QRCodeMod
                 <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">TXT</span>
               </button>
               <button
-                onClick={handleEmail}
-                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-100 group"
-                title="Email"
+                disabled
+                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl border border-gray-100 group opacity-50 cursor-not-allowed"
+                title="Email (Indisponível)"
               >
-                <Mail className="h-5 w-5 text-gray-400 group-hover:text-gray-900 mb-1 transition-colors" />
-                <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">Email</span>
+                <Mail className="h-5 w-5 text-gray-400 mb-1 transition-colors" />
+                <span className="text-[10px] font-medium text-gray-500 transition-colors">Email</span>
               </button>
               <button
-                onClick={handleWhatsApp}
-                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-100 group"
-                title="WhatsApp"
+                disabled
+                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl border border-gray-100 group opacity-50 cursor-not-allowed"
+                title="WhatsApp (Indisponível)"
               >
-                <MessageCircle className="h-5 w-5 text-gray-400 group-hover:text-gray-900 mb-1 transition-colors" />
-                <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">Whats</span>
+                <MessageCircle className="h-5 w-5 text-gray-400 mb-1 transition-colors" />
+                <span className="text-[10px] font-medium text-gray-500 transition-colors">Whats</span>
               </button>
               <button
-                onClick={handleSMS}
-                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-100 group"
-                title="SMS"
+                disabled
+                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl border border-gray-100 group opacity-50 cursor-not-allowed"
+                title="SMS (Indisponível)"
               >
-                <Smartphone className="h-5 w-5 text-gray-400 group-hover:text-gray-900 mb-1 transition-colors" />
-                <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">SMS</span>
+                <Smartphone className="h-5 w-5 text-gray-400 mb-1 transition-colors" />
+                <span className="text-[10px] font-medium text-gray-500 transition-colors">SMS</span>
               </button>
             </div>
           </div>

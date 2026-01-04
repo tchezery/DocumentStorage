@@ -147,8 +147,15 @@ export default function Transparency() {
           {/* Criador */}
           <div className="bg-white rounded-3xl p-10 card-shadow">
             <h2 className="text-2xl font-semibold mb-4 text-gray-900 tracking-tight">Criado por</h2>
-            <p className="text-lg text-gray-900 font-medium mb-2">
-              Tchézery Ribeiro
+            <p className="text-lg mb-2">
+              <a 
+                href="https://www.linkedin.com/in/tchezery" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
+              >
+                Tchézery Ribeiro
+              </a>
             </p>
             <p className="text-gray-500 font-medium leading-relaxed">
               Este projeto foi criado com dedicação e atenção aos detalhes. Se você tiver 

@@ -5,6 +5,7 @@ using System.IO.Compression;
 using backend.Data;
 using backend.Models;
 using backend.Services;
+using System.Drawing;
 
 [ApiController]
 [Route("api/file")]
@@ -24,6 +25,7 @@ public class UploadController : ControllerBase
     [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
     public async Task<IActionResult> UploadV2(List<IFormFile> files, [FromForm] List<string> paths)
     {
+
         if (files == null || files.Count == 0)
         {
             return BadRequest("Nenhum arquivo identificado");
@@ -34,9 +36,29 @@ public class UploadController : ControllerBase
             return BadRequest("Arquivos e paths não correspondem");
         }
 
+        long sizeLimit = 2147483648;
+        long totalSize = files.Sum(f => f.Length);
+
+        if (totalSize > sizeLimit)
+        {
+            return BadRequest($"O tamanho total dos arquivos excede o limite de 2 GB. Tamanho atual: {totalSize / 1024 / 1024} MB.");
+        }
+
+        string code = "";
+        bool codeExists = true;
+        var random = new Random();
+
+        while (codeExists)
+        {
+            code = random.Next(1000, 10000).ToString();
+
+            codeExists = await _context.FileNode
+                .AnyAsync(n => n.Name == code && n.ParentId == null);
+        }
+
         var root = new FileNode
         {
-            Name = "root",
+            Name = code,
             Type = "folder",
             ParentId = null,
             ExpiresAt = DateTime.UtcNow.AddDays(3)
@@ -44,8 +66,6 @@ public class UploadController : ControllerBase
 
         _context.FileNode.Add(root);
         await _context.SaveChangesAsync();
-
-        root.Name = root.Id.ToString();
 
         for (int i = 0; i < files.Count; i++)
         {
@@ -81,7 +101,7 @@ public class UploadController : ControllerBase
         
         return Ok(new
         {
-            code = root.Id
+            code = code
         });
     }
 
@@ -112,11 +132,11 @@ public class UploadController : ControllerBase
     }
 
     [HttpGet("downloadV2/{code}")]
-    public async Task<IActionResult> DownloadV2(int code)
+    public async Task<IActionResult> DownloadV2(string code)
     {
 
         var root = await _context.FileNode
-            .FirstOrDefaultAsync(n => n.Id == code);
+            .FirstOrDefaultAsync(n => n.Name == code && n.ParentId == null);
         
         if (root == null)
         {
@@ -142,7 +162,7 @@ public class UploadController : ControllerBase
         return File(
             memoryStream,
             "application/zip",
-            $"DS{root.Name}.zip"
+            $"DS-{root.Name}.zip"
         );
     }
 
@@ -162,6 +182,9 @@ public class UploadController : ControllerBase
             var entry = zip.CreateEntry(path);
 
             using var entryStream = entry.Open();
+
+            if (!System.IO.File.Exists(node.Blob!.StoragePath)) return;
+            
             using var fileStream = System.IO.File.OpenRead(node.Blob!.StoragePath);
             
             await fileStream.CopyToAsync(entryStream);
