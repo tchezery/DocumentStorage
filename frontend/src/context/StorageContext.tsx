@@ -21,7 +21,7 @@ export const useStorage = () => {
 };
 
 const DEFAULT_STORAGE = 1.0; // 1GB
-const MAX_AD_STORAGE = 8.0;
+// const MAX_AD_STORAGE = 8.0;
 const MAX_TOTAL_STORAGE = 2.0; // Hard limit for now
 
 export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

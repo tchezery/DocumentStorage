@@ -38,32 +38,32 @@ export default function QRCodeModal({ code, expirationDate, onClose }: QRCodeMod
     URL.revokeObjectURL(url)
   }
 
-  const handleEmail = () => {
-    const subject = encodeURIComponent('Código de Download - Document Storage')
-    const body = encodeURIComponent(
-      `Seu código de download é: ${code}\n\n` +
-      `Data de Expiração: ${formattedDate}\n` +
-      `Dias Restantes: ${daysRemaining}`
-    )
-    window.location.href = `mailto:?subject=${subject}&body=${body}`
-  }
+  // const handleEmail = () => {
+  //   const subject = encodeURIComponent('Código de Download - Document Storage')
+  //   const body = encodeURIComponent(
+  //     `Seu código de download é: ${code}\n\n` +
+  //     `Data de Expiração: ${formattedDate}\n` +
+  //     `Dias Restantes: ${daysRemaining}`
+  //   )
+  //   window.location.href = `mailto:?subject=${subject}&body=${body}`
+  // }
 
-  const handleWhatsApp = () => {
-    const message = encodeURIComponent(
-      `Código de Download: ${code}\n` +
-      `Data de Expiração: ${formattedDate}\n` +
-      `Dias Restantes: ${daysRemaining}`
-    )
-    window.open(`https://wa.me/?text=${message}`, '_blank')
-  }
+  // const handleWhatsApp = () => {
+  //   const message = encodeURIComponent(
+  //     `Código de Download: ${code}\n` +
+  //     `Data de Expiração: ${formattedDate}\n` +
+  //     `Dias Restantes: ${daysRemaining}`
+  //   )
+  //   window.open(`https://wa.me/?text=${message}`, '_blank')
+  // }
 
-  const handleSMS = () => {
-    const message = encodeURIComponent(
-      `Código de Download: ${code}\n` +
-      `Data de Expiração: ${formattedDate}`
-    )
-    window.location.href = `sms:?body=${message}`
-  }
+  // const handleSMS = () => {
+  //   const message = encodeURIComponent(
+  //     `Código de Download: ${code}\n` +
+  //     `Data de Expiração: ${formattedDate}`
+  //   )
+  //   window.location.href = `sms:?body=${message}`
+  // }
 
   // QR Code now points to the app with the code as a parameter
   const qrCodeValue = `${window.location.origin}/?code=${code}`

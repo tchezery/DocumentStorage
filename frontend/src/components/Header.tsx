@@ -50,9 +50,11 @@ export default function Header({ onLoginClick }: HeaderProps) {
           <div className="flex items-center justify-between h-12">
             {/* Logo */}
             <Link to="/" onClick={handleScrollToTop} className="flex items-center space-x-2 z-50">
-              <div className="w-6 h-6 bg-gray-900 rounded-md flex items-center justify-center transition-transform active:scale-95">
-                <span className="text-white font-bold text-sm">D</span>
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="Document Storage Logo" 
+                className="w-8 h-8 object-contain transition-transform active:scale-95" 
+              />
               <div className="flex items-baseline space-x-2">
                               <span className="text-lg font-semibold text-gray-900 tracking-tight">Document Storage</span>
                               {!isMenuOpen && (
