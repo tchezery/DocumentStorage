@@ -1,4 +1,4 @@
-import { Github, Mail, Instagram } from 'lucide-react'
+import { Github, Mail, Instagram, Linkedin } from 'lucide-react'
 
 export default function About() {
   return (
@@ -21,32 +21,47 @@ export default function About() {
               Criado por
             </p>
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-              <span className="text-lg text-gray-900 font-medium">Tchézery Ribeiro</span>
-              <div className="flex gap-6">
+                              <a 
+                                href="https://www.linkedin.com/in/tchezery" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-lg text-gray-900 font-medium hover:text-blue-600 transition-colors"
+                              >
+                                Tchézery Ribeiro
+                              </a>              <div className="flex gap-6 flex-wrap">
+                <a
+                  href="https://www.linkedin.com/in/tchezery"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-gray-500 hover:text-[#0077b5] transition-colors group"
+                >
+                  <Linkedin className="h-5 w-5 text-[#0077b5] group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium">LinkedIn</span>
+                </a>
                 <a
                   href="https://github.com/tchezery"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-400 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-2 text-gray-500 hover:text-[#24292e] transition-colors group"
                 >
-                  <Github className="h-5 w-5" />
-                  <span className="text-sm">GitHub</span>
+                  <Github className="h-5 w-5 text-[#24292e] group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium">GitHub</span>
                 </a>
                 <a
                   href="mailto:tchezeryribeiro@gmail.com"
-                  className="flex items-center space-x-2 text-gray-400 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-2 text-gray-500 hover:text-[#ea4335] transition-colors group"
                 >
-                  <Mail className="h-5 w-5" />
-                  <span className="text-sm">Email</span>
+                  <Mail className="h-5 w-5 text-[#ea4335] group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium">Email</span>
                 </a>
                 <a
                   href="https://instagram.com/tchesery"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-400 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-2 text-gray-500 hover:text-[#e4405f] transition-colors group"
                 >
-                  <Instagram className="h-5 w-5" />
-                  <span className="text-sm">Instagram</span>
+                  <Instagram className="h-5 w-5 text-[#e4405f] group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium">Instagram</span>
                 </a>
               </div>
             </div>

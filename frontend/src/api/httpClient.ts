@@ -20,6 +20,28 @@ api.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+// Add response interceptor to handle errors globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    let message = 'Ocorreu um erro inesperado.';
+    
+    if (error.response && error.response.data) {
+      // Try to extract the message from common backend error formats
+      message = error.response.data.message || error.response.data.error || JSON.stringify(error.response.data);
+    } else if (error.message) {
+      message = error.message;
+    }
+
+    // Dispatch custom event for the NotificationContext to pick up
+    window.dispatchEvent(new CustomEvent('api-error', { 
+      detail: { message } 
+    }));
+
+    return Promise.reject(error);
+  }
+);
+
 export const httpClient = {
   get: async <T>(endpoint: string): Promise<T> => {
     const response = await api.get<T>(endpoint);

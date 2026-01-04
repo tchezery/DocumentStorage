@@ -131,28 +131,28 @@ export default function QRCodeModal({ code, expirationDate, onClose }: QRCodeMod
                 <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">TXT</span>
               </button>
               <button
-                onClick={handleEmail}
-                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-100 group"
-                title="Email"
+                disabled
+                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl border border-gray-100 group opacity-50 cursor-not-allowed"
+                title="Email (Indisponível)"
               >
-                <Mail className="h-5 w-5 text-gray-400 group-hover:text-gray-900 mb-1 transition-colors" />
-                <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">Email</span>
+                <Mail className="h-5 w-5 text-gray-400 mb-1 transition-colors" />
+                <span className="text-[10px] font-medium text-gray-500 transition-colors">Email</span>
               </button>
               <button
-                onClick={handleWhatsApp}
-                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-100 group"
-                title="WhatsApp"
+                disabled
+                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl border border-gray-100 group opacity-50 cursor-not-allowed"
+                title="WhatsApp (Indisponível)"
               >
-                <MessageCircle className="h-5 w-5 text-gray-400 group-hover:text-gray-900 mb-1 transition-colors" />
-                <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">Whats</span>
+                <MessageCircle className="h-5 w-5 text-gray-400 mb-1 transition-colors" />
+                <span className="text-[10px] font-medium text-gray-500 transition-colors">Whats</span>
               </button>
               <button
-                onClick={handleSMS}
-                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-100 group"
-                title="SMS"
+                disabled
+                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl border border-gray-100 group opacity-50 cursor-not-allowed"
+                title="SMS (Indisponível)"
               >
-                <Smartphone className="h-5 w-5 text-gray-400 group-hover:text-gray-900 mb-1 transition-colors" />
-                <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">SMS</span>
+                <Smartphone className="h-5 w-5 text-gray-400 mb-1 transition-colors" />
+                <span className="text-[10px] font-medium text-gray-500 transition-colors">SMS</span>
               </button>
             </div>
           </div>

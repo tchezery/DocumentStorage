@@ -13,10 +13,15 @@ import About from '../components/home/About'
 import Footer from '../components/Footer'
 
 import { fileService } from '../services/fileService'
+import { useStorage } from '../context/StorageContext'
+import { useNotification } from '../context/NotificationContext'
 
 export default function Home() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { adsWatched, watchAd, subscribe, share } = useStorage()
+  const { showNotification } = useNotification()
+
   const [showQRModal, setShowQRModal] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showFileBrowser, setShowFileBrowser] = useState(false)
@@ -24,7 +29,6 @@ export default function Home() {
   const [uploadCode, setUploadCode] = useState<string | null>(null)
   const [downloadCode, setDownloadCode] = useState<string | null>(null)
   const [expirationDate, setExpirationDate] = useState<Date | null>(null)
-  const [adsWatched, setAdsWatched] = useState(0) // Rastrear anúncios assistidos
   
   // Simular preço atual (será calculado pelo backend baseado no uso)
   const [currentPrice] = useState(1.0) // $1 USD inicial
@@ -84,7 +88,7 @@ export default function Home() {
       // setShowFileBrowser(false) 
     } catch (error) {
       console.error('Download failed:', error)
-      alert('Erro ao baixar arquivo. Verifique se o código está correto e não expirou.')
+      showNotification('Erro ao baixar arquivo. Verifique se o código está correto e não expirou.', 'error')
     }
   }
 
@@ -155,33 +159,38 @@ export default function Home() {
             alert('Redirecionando para pagamento PIX...')
             setShowUpgradeModal(false)
           }}
-          onWatchAd={(storageGained) => {
-            // Aqui você implementaria a lógica de anúncio
-            setAdsWatched(prev => prev + 1)
-            alert(`Anúncio assistido! Você ganhou ${storageGained >= 1 ? storageGained.toFixed(1) + 'GB' : (storageGained * 1024).toFixed(0) + 'MB'} adicional.`)
-            setShowUpgradeModal(false)
+          onWatchAd={async () => {
+             const storageGained = await watchAd();
+             showNotification(`Anúncio assistido! Você ganhou ${storageGained >= 1 ? storageGained.toFixed(1) + 'GB' : (storageGained * 1024).toFixed(0) + 'MB'} adicional.`, 'success');
+             setShowUpgradeModal(false);
           }}
           onSubscribe={() => {
-            // Aqui você implementaria a lógica de inscrição
-            alert('Obrigado por se inscrever! Você ganhou +1GB.')
-            setShowUpgradeModal(false)
+            subscribe();
+            showNotification('Obrigado por se inscrever! Você ganhou +1GB.', 'success');
+            setShowUpgradeModal(false);
+            // navigate('/register') // Removed navigation to keep them in context, or we can keep it. User said "fizer a inscrição", implies doing it.
+            // If we navigate, we lose the modal. Let's assume the button actions "simulates" it or we handle it here.
+            // For now, I'll update the context.
           }}
           onShare={() => {
-            // Aqui você implementaria a lógica de compartilhamento
             if (navigator.share) {
               navigator.share({
                 title: 'Document Storage',
                 text: 'Conheça o Document Storage - Guarde seus documentos com segurança!',
                 url: window.location.href
               }).then(() => {
-                alert('Obrigado por compartilhar! Você ganhou +1GB.')
-                setShowUpgradeModal(false)
-              })
+                share();
+                showNotification('Obrigado por compartilhar! Você ganhou +1GB.', 'success');
+                setShowUpgradeModal(false);
+              }).catch(() => {
+                 // User cancelled share
+              });
             } else {
               // Fallback: copiar link
-              navigator.clipboard.writeText(window.location.href)
-              alert('Link copiado! Obrigado por compartilhar. Você ganhou +1GB.')
-              setShowUpgradeModal(false)
+              navigator.clipboard.writeText(window.location.href);
+              share();
+              showNotification('Link copiado! Obrigado por compartilhar. Você ganhou +1GB.', 'success');
+              setShowUpgradeModal(false);
             }
           }}
         />

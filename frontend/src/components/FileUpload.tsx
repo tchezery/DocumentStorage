@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { Upload, X, CheckCircle2, FolderUp } from 'lucide-react'
 import Button from './Button'
 import { fileService } from '../services/fileService'
+import { useStorage } from '../context/StorageContext'
 
 interface FileWithProgress {
   file: File
@@ -12,22 +13,28 @@ interface FileWithProgress {
 }
 
 interface FileUploadProps {
-  maxSizeGB: number
+  // Removed maxSizeGB prop as we now use context, but keeping it optional for backward compat if needed, 
+  // though we will ignore it in favor of context.
+  maxSizeGB?: number 
   onUploadComplete: (files: File[], code: string) => void
 }
 
-export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadProps) {
+export default function FileUpload({ onUploadComplete }: FileUploadProps) {
+  const { totalStorage } = useStorage()
+  // Use context storage as the source of truth for limit
+  const currentLimitGB = totalStorage
+
   const [files, setFiles] = useState<FileWithProgress[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const folderInputRef = useRef<HTMLInputElement>(null)
 
-  const maxSizeBytes = maxSizeGB * 1024 * 1024 * 1024
+  const maxSizeBytes = currentLimitGB * 1024 * 1024 * 1024
 
   const validateFile = (file: File): string | null => {
     if (file.size > maxSizeBytes) {
-      return `Arquivo "${file.name}" excede o limite de ${maxSizeGB}GB`
+      return `Arquivo "${file.name}" excede o limite de ${currentLimitGB}GB`
     }
     return null
   }
@@ -98,7 +105,7 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (folderInputRef.current) folderInputRef.current.value = ''
 
-  }, [maxSizeGB, maxSizeBytes])
+  }, [currentLimitGB, maxSizeBytes])
 
   // Recursive directory traversal
   const traverseFileTree = async (item: any, path: string = '') => {
@@ -220,7 +227,13 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
 
   const totalSize = files.reduce((acc, f) => acc + f.file.size, 0)
   const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2)
-  const maxSizeMB = (maxSizeGB * 1024).toFixed(0)
+  const maxSizeMB = (currentLimitGB * 1024).toFixed(0)
+
+  // Determine styles for the "Máximo" text
+  const isUpgraded = currentLimitGB > 1.0;
+  const maxLimitStyle = isUpgraded
+    ? "bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg border border-blue-100 font-semibold shadow-sm inline-block mt-1"
+    : "text-gray-500";
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -258,24 +271,27 @@ export default function FileUpload({ maxSizeGB, onUploadComplete }: FileUploadPr
             <p className="text-xl font-semibold mb-2 text-gray-900 tracking-tight">
               Arraste arquivos ou pastas aqui
             </p>
-            <p className="text-sm text-gray-500 mb-8 font-medium">
-              Todos os tipos são suportados. Máximo {maxSizeGB}GB.
+            <p className={`text-sm mb-8 font-medium ${!isUpgraded ? "text-gray-500" : ""}`}>
+              Todos os tipos são suportados. <br className="md:hidden" />
+              <span className={maxLimitStyle}>
+                 Máximo {currentLimitGB.toFixed(1)} GB
+              </span>
             </p>
-            <div className="flex justify-center gap-4">
-                <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="secondary"
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center justify-center space-x-2 px-8 py-3 bg-[#0071e3] text-white rounded-full font-semibold hover:bg-[#0077ed] active:scale-95 transition-all duration-200 shadow-sm"
                 >
-                Selecionar Arquivos
-                </Button>
-                <Button
-                onClick={() => folderInputRef.current?.click()}
-                variant="outline"
-                className="flex items-center gap-2"
+                  <Upload size={18} />
+                  <span>Selecionar Arquivos</span>
+                </button>
+                <button
+                  onClick={() => folderInputRef.current?.click()}
+                  className="flex items-center justify-center space-x-2 px-8 py-3 bg-white text-[#0071e3] border-2 border-[#0071e3] rounded-full font-semibold hover:bg-blue-50 active:scale-95 transition-all duration-200 shadow-sm"
                 >
-                <FolderUp size={18} />
-                Selecionar Pasta
-                </Button>
+                  <FolderUp size={18} />
+                  <span>Selecionar Pasta</span>
+                </button>
             </div>
           </>
         ) : (
