@@ -15,7 +15,7 @@ public class FileController : ControllerBase
     }
 
     [HttpGet("infoV2/{code}")]
-    public async Task<IActionResult> GetFileInfo(int code)
+    public async Task<IActionResult> GetFileInfo(string code)
     {
         var tree = await _fileStorageService.GetFileTreeAsync(code);
 

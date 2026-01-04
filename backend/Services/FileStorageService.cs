@@ -62,10 +62,10 @@ public class FileStorageService
         return blob;
     } 
 
-    public async Task<FileNode?> GetFileTreeAsync(int rootId)
+    public async Task<FileNode?> GetFileTreeAsync(string code)
     {
         var root = await _context.FileNode
-            .FirstOrDefaultAsync(n => n.Id == rootId);
+            .FirstOrDefaultAsync(n => n.Name == code && n.ParentId == null);
 
         if (root == null)
         {
