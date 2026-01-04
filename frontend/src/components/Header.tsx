@@ -53,7 +53,7 @@ export default function Header({ onLoginClick }: HeaderProps) {
               <img 
                 src="/logo.png" 
                 alt="Document Storage Logo" 
-                className="w-8 h-8 object-contain transition-transform active:scale-95" 
+                className="w-8 h-8 object-contain rounded-lg transition-transform active:scale-95" 
               />
               <div className="flex items-baseline space-x-2">
                               <span className="text-lg font-semibold text-gray-900 tracking-tight">Document Storage</span>
